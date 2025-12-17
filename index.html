@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
-  <title>考試隨機排座 (7人一桌)</title>
+  <title>考試隨機排座 (6人一桌)</title>
   <style>
     :root {
       --bg: #f7f6f2;
@@ -64,6 +64,7 @@
     }
     .tables {
       display: grid;
+      /* 這裡控制兩欄排列，不需要改動，移除 wide 後最後一個會自動靠左 */
       grid-template-columns: repeat(2, minmax(280px, 1fr));
       gap: 12px;
       margin-top: 16px;
@@ -83,12 +84,6 @@
       font-weight: 800;
       letter-spacing: 0.5px;
     }
-    .wide {
-      grid-column: 1 / span 2;
-      max-width: 640px;
-      width: 100%;
-      justify-self: center;
-    }
     .table-visual {
       border: 2px solid var(--line);
       border-radius: 12px;
@@ -97,7 +92,8 @@
     }
     .seat-row {
       display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
+      /* 維持 6 人一桌的設定 */
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: 6px;
       margin-bottom: 4px;
     }
@@ -136,13 +132,12 @@
       body { padding: 16px; }
       .tables { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
       .seat-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .wide { grid-column: auto; }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>考試隨機排座 (7人一桌)</h1>
+    <h1>考試隨機排座 (6人一桌)</h1>
     <div class="muted">載入 logic.txt 後按下「重新洗牌」即可。會自動增加桌數以容納所有學生。</div>
   </header>
 
@@ -152,7 +147,7 @@
       <input type="file" id="file" accept=".txt">
     </div>
     <div class="control">
-      <label>想要的桌數 <span>每桌 7 人，可留空自動計算</span></label>
+      <label>想要的桌數 <span>每桌 6 人，可留空自動計算</span></label>
       <input type="number" id="tableCount" min="1" placeholder="自動">
     </div>
     <div class="control">
@@ -167,7 +162,8 @@
   <section class="tables" id="tables"></section>
 
   <script>
-    const seatsPerTable = 7;
+    const seatsPerTable = 6;
+    
     const statusEl = document.getElementById("status");
     const tablesEl = document.getElementById("tables");
     const fileInput = document.getElementById("file");
@@ -183,7 +179,7 @@
         .filter(Boolean)
         .map((line) => {
           const parts = line.split(/\s+/);
-          if (parts.length >= 2) return parts.slice(1).join(""); // 顯示姓名
+          if (parts.length >= 2) return parts.slice(1).join(""); 
           return parts[0];
         });
     }
@@ -232,12 +228,10 @@
             `;
           }).join("");
 
-          // 若最後剩一張桌，置中佔滿一列，排版類似「兩桌一排，最後單桌置中」。
-          const isLastAlone = tables.length % 2 === 1 && idx === tables.length - 1;
-          const wideClass = isLastAlone ? "wide" : "";
-
+          // 修改處：移除了這裡原本判斷 "isLastAlone" 的邏輯
+          // 所有的 table-card 樣式統一，就會依照 Grid 自動靠左排列
           return `
-            <article class="table-card ${wideClass}">
+            <article class="table-card">
               <div class="table-title">Table ${idx + 1}</div>
               <div class="table-visual">
                 <div class="seat-row">${seatRow}</div>
